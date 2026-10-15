@@ -14,11 +14,19 @@ builder.Services.AddDbContext<AppDbContext>(opt =>
 
 builder.Services.AddScoped<IRoomService, RoomService>();
 
+var corsOrigins = builder.Configuration["CorsOrigins"] ?? "http://localhost:5173";
+
 builder.Services.AddCors(opt =>
     opt.AddDefaultPolicy(p =>
-        p.WithOrigins("http://localhost:5173").AllowAnyHeader().AllowAnyMethod()));
+        p.WithOrigins(corsOrigins).AllowAnyHeader().AllowAnyMethod()));
 
 var app = builder.Build();
+
+using (var scope = app.Services.CreateScope())
+{
+    var db = scope.ServiceProvider.GetRequiredService<AppDbContext>();
+    DbSeeder.Seed(db);
+}
 
 // Configure the HTTP request pipeline.
 if (app.Environment.IsDevelopment())
