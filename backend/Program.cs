@@ -13,6 +13,7 @@ builder.Services.AddDbContext<AppDbContext>(opt =>
     opt.UseInMemoryDatabase("RoomReservationDb"));
 
 builder.Services.AddScoped<IRoomService, RoomService>();
+builder.Services.AddScoped<IUserService, UserService>();
 
 var corsOrigins = builder.Configuration["CorsOrigins"] ?? "http://localhost:5173";
 
