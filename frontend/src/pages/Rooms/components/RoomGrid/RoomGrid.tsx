@@ -1,6 +1,34 @@
-import { rooms } from "./data";
+import { useEffect, useState } from "react";
+import axiosInstance from "../../../../api/axiosInstance";
+import { endpoints } from "../../../../api/endpoints";
+import type { Room } from "./types";
+import { Loader } from "../../../../components/Loader/Loader";
+import { ErrorMessage } from "../../../../components/ErrorMessage/ErrorMessage";
 
 const RoomGrid = () => {
+  const [rooms, setRooms] = useState<Room[]>([]);
+  const [loading, setLoading] = useState<boolean>(true);
+  const [error, setError] = useState<string | null>(null);
+
+  useEffect(() => {
+    const getRooms = async () => {
+      setLoading(true);
+      try {
+        const response = await axiosInstance.get(endpoints.rooms());
+        setRooms(response.data);
+        setError(null);
+        setLoading(false);
+      } catch (err) {
+        setError(err instanceof Error ? err.message : null);
+        setLoading(false);
+      }
+    };
+    getRooms();
+  }, []);
+
+  if (loading) return <Loader />;
+  if (error) return <ErrorMessage message={error} />;
+
   return (
     <div>
       <p className="text-sm text-slate-600">
@@ -20,18 +48,20 @@ const RoomGrid = () => {
                 <p className="mt-1 text-sm text-slate-500">{room.id}</p>
               </div>
               <span
-                className={`rounded px-2 py-1 text-xs font-medium ${room.active ? "bg-green-100 text-green-700" : "bg-slate-100 text-slate-600"}`}
+                className={`rounded px-2 py-1 text-xs font-medium ${
+                  room.isActive
+                    ? "bg-green-100 text-green-700"
+                    : "bg-slate-100 text-slate-600"
+                }`}
               >
-                {room.active ? "Active" : "Inactive"}
+                {room.isActive ? "Active" : "Inactive"}
               </span>
             </div>
 
             <div className="mt-4 grid grid-cols-2 gap-4 text-sm">
               <div>
-                <p className="text-slate-500">Location</p>
-                <p className="font-medium">
-                  Floor {room.floor}, {room.location}
-                </p>
+                <p className="text-slate-500">Floor</p>
+                <p className="font-medium">{room.floor}</p>
               </div>
               <div>
                 <p className="text-slate-500">Capacity</p>
@@ -42,15 +72,35 @@ const RoomGrid = () => {
             <div className="mt-4">
               <p className="text-sm text-slate-500">Equipment</p>
               <div className="mt-2 flex flex-wrap gap-2">
-                {room.equipment.map((item) => (
-                  <span
-                    key={item}
-                    className="rounded bg-slate-100 px-2 py-1 text-xs text-slate-700"
-                  >
-                    {item}
+                {room.hasProjector && (
+                  <span className="rounded bg-slate-100 px-2 py-1 text-xs text-slate-700">
+                    Projector
                   </span>
-                ))}
+                )}
+                {room.hasTvScreen && (
+                  <span className="rounded bg-slate-100 px-2 py-1 text-xs text-slate-700">
+                    TV Screen
+                  </span>
+                )}
+                {room.hasVideoConferencing && (
+                  <span className="rounded bg-slate-100 px-2 py-1 text-xs text-slate-700">
+                    Video Conferencing
+                  </span>
+                )}
+                {room.hasWhiteboard && (
+                  <span className="rounded bg-slate-100 px-2 py-1 text-xs text-slate-700">
+                    Whiteboard
+                  </span>
+                )}
               </div>
+            </div>
+
+            <div className="mt-4 text-xs text-slate-500">
+              <p>
+                Bookings: {room.totalReservationsCount} (
+                {room.completedReservationsCount} completed,{" "}
+                {room.cancelledReservationsCount} cancelled)
+              </p>
             </div>
           </article>
         ))}
