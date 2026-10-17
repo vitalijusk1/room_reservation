@@ -12,6 +12,10 @@ public class ReservationsController(IReservationService reservations) : Controll
     public async Task<ActionResult<List<ReservationDto>>> GetAll([FromQuery] ReservationFilterDto filter)
         => Ok(await reservations.GetAllAsync(filter));
 
+    [HttpGet("filter-options")]
+    public async Task<ActionResult<ReservationFilterOptionsDto>> GetFilterOptions()
+        => Ok(await reservations.GetFilterOptionsAsync());
+
     [HttpPost]
     public async Task<ActionResult<ReservationDto>> Create(CreateReservationRequest request)
     {
