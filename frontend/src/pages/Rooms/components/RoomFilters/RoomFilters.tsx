@@ -92,9 +92,9 @@ const RoomFilters = () => {
             className="h-11 w-full rounded-xl border border-slate-200 bg-slate-50 px-3 text-sm text-slate-600 outline-none focus:border-indigo-400"
           >
             <option value="">Any capacity</option>
-            {Array.from({ length: Math.ceil(filterOptions.maxCapacity / 4) }, (_, i) => (i + 1) * 4).map((cap) => (
-              <option key={cap} value={cap}>
-                {cap}+ people
+            {filterOptions.capacities.map((capacity) => (
+              <option key={capacity} value={capacity}>
+                {capacity}+ people
               </option>
             ))}
           </select>

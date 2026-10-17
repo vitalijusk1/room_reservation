@@ -5,7 +5,7 @@ export interface EquipmentOption {
 
 export interface RoomFilterOptions {
   floors: string[];
-  maxCapacity: number;
+  capacities: number[];
 }
 
 export const EQUIPMENT_OPTIONS: EquipmentOption[] = [

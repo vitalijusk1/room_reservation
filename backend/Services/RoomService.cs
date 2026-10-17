@@ -58,12 +58,16 @@ public class RoomService(AppDbContext db) : IRoomService
             .OrderBy(f => f)
             .ToList();
 
-        var maxCapacity = rooms.Max(r => r.Capacity);
+        var capacities = rooms
+            .Select(r => r.Capacity)
+            .Distinct()
+            .OrderBy(c => c)
+            .ToList();
 
         return new RoomFilterOptionsDto
         {
             Floors = floors,
-            MaxCapacity = maxCapacity
+            Capacities = capacities
         };
     }
 }
