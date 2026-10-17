@@ -3,4 +3,5 @@ export const endpoints = {
   rooms: () => "/rooms",
   roomFilterOptions: () => "/rooms/filter-options",
   reservations: () => "/reservations",
+  reservationFilterOptions: () => "/reservations/filter-options",
 };

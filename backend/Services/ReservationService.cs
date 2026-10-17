@@ -46,6 +46,23 @@ public class ReservationService(AppDbContext db, IConfiguration config) : IReser
             .ToListAsync();
     }
 
+    public async Task<ReservationFilterOptionsDto> GetFilterOptionsAsync()
+    {
+        var rooms = await db.Rooms
+            .Select(r => new ReservationRoomOptionDto { Id = r.Id, Name = r.Name })
+            .ToListAsync();
+
+        var organizers = await db.Users
+            .Select(u => new ReservationOrganizerOptionDto { Id = u.Id, Name = u.FirstName + " " + u.LastName })
+            .ToListAsync();
+
+        return new ReservationFilterOptionsDto
+        {
+            Rooms = rooms,
+            Organizers = organizers
+        };
+    }
+
     public async Task<ReservationDto> CreateAsync(CreateReservationRequest request)
     {
         var room = await db.Rooms.FindAsync(request.RoomId);
