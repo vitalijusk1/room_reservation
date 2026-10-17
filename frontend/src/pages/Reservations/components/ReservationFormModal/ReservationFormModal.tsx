@@ -1,10 +1,14 @@
 import type { FormEvent, MouseEvent } from "react";
+import type { Room } from "../../../Rooms/components/RoomGrid/types";
+import type { User } from "../../../Users/components/UserTable/types";
 
 interface ReservationFormModalProps {
   onClose: () => void;
+  rooms: Room[];
+  users: User[];
 }
 
-const ReservationFormModal = ({ onClose }: ReservationFormModalProps) => {
+const ReservationFormModal = ({ onClose, rooms, users }: ReservationFormModalProps) => {
   const handleSubmit = (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
     onClose();
@@ -60,9 +64,11 @@ const ReservationFormModal = ({ onClose }: ReservationFormModalProps) => {
               className="h-11 w-full rounded-lg border border-slate-200 px-3"
             >
               <option value="">Select room</option>
-              <option>Aurora</option>
-              <option>Horizon</option>
-              <option>Maple</option>
+              {rooms.map((room) => (
+                <option key={room.id} value={room.id}>
+                  {room.name}
+                </option>
+              ))}
             </select>
           </label>
 
@@ -75,8 +81,11 @@ const ReservationFormModal = ({ onClose }: ReservationFormModalProps) => {
               className="h-11 w-full rounded-lg border border-slate-200 px-3"
             >
               <option value="">Select organizer</option>
-              <option>Maya Keller</option>
-              <option>Samuel Jones</option>
+              {users.map((user) => (
+                <option key={user.id} value={user.id}>
+                  {user.firstName} {user.lastName}
+                </option>
+              ))}
             </select>
           </label>
 

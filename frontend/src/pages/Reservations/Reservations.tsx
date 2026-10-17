@@ -5,21 +5,31 @@ import ReservationFormModal from "./components/ReservationFormModal/ReservationF
 import axiosInstance from "../../api/axiosInstance";
 import { endpoints } from "../../api/endpoints";
 import type { Reservation } from "./components/ReservationTable/types";
+import type { Room } from "../Rooms/components/RoomGrid/types";
+import type { User } from "../Users/components/UserTable/types";
 import { Loader } from "../../components/Loader/Loader";
 import { ErrorMessage } from "../../components/ErrorMessage/ErrorMessage";
 
 const Reservations = () => {
   const [reservations, setReservations] = useState<Reservation[]>([]);
+  const [rooms, setRooms] = useState<Room[]>([]);
+  const [users, setUsers] = useState<User[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
   const [showForm, setShowForm] = useState(false);
 
   useEffect(() => {
-    const getReservations = async () => {
+    const fetchData = async () => {
       setLoading(true);
       try {
-        const response = await axiosInstance.get(endpoints.reservations());
-        setReservations(response.data);
+        const [reservationsRes, roomsRes, usersRes] = await Promise.all([
+          axiosInstance.get(endpoints.reservations()),
+          axiosInstance.get(endpoints.rooms()),
+          axiosInstance.get(endpoints.users()),
+        ]);
+        setReservations(reservationsRes.data);
+        setRooms(roomsRes.data);
+        setUsers(usersRes.data);
         setError(null);
         setLoading(false);
       } catch (err) {
@@ -27,7 +37,7 @@ const Reservations = () => {
         setLoading(false);
       }
     };
-    getReservations();
+    fetchData();
   }, []);
 
   if (loading) return <Loader />;
@@ -44,7 +54,13 @@ const Reservations = () => {
 
       <ReservationTable reservations={reservations} />
 
-      {showForm && <ReservationFormModal onClose={() => setShowForm(false)} />}
+      {showForm && (
+        <ReservationFormModal
+          onClose={() => setShowForm(false)}
+          rooms={rooms}
+          users={users}
+        />
+      )}
     </section>
   );
 };
