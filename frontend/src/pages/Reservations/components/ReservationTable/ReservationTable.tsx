@@ -1,14 +1,4 @@
-export interface Reservation {
-  id: string;
-  title: string;
-  room: string;
-  organizer: string;
-  date: string;
-  start: string;
-  end: string;
-  attendees: number;
-  status: string;
-}
+import type { Reservation } from "./types";
 
 interface ReservationTableProps {
   reservations: Reservation[];
@@ -42,15 +32,15 @@ const ReservationTable = ({ reservations }: ReservationTableProps) => {
                 <p className="text-sm font-semibold">{reservation.title}</p>
                 <p className="mt-1 text-xs text-slate-500">{reservation.id}</p>
               </td>
-              <td className="px-5 py-4 text-sm">{reservation.room}</td>
-              <td className="px-5 py-4 text-sm">{reservation.organizer}</td>
+              <td className="px-5 py-4 text-sm">{reservation.roomName}</td>
+              <td className="px-5 py-4 text-sm">{reservation.organizerName}</td>
               <td className="px-5 py-4">
-                <p className="text-sm">{reservation.date}</p>
+                <p className="text-sm">{new Date(reservation.startDate).toLocaleDateString()}</p>
                 <p className="text-xs text-slate-500">
-                  {reservation.start} – {reservation.end}
+                  {new Date(reservation.startDate).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })} – {new Date(reservation.endDate).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}
                 </p>
               </td>
-              <td className="px-5 py-4 text-sm">{reservation.attendees}</td>
+              <td className="px-5 py-4 text-sm">{reservation.attendeesCount}</td>
               <td className="px-5 py-4">
                 <span
                   className={`rounded px-2 py-1 text-xs font-medium ${statusStyles[reservation.status]}`}
