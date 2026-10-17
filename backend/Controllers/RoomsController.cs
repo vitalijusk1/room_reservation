@@ -11,4 +11,8 @@ public class RoomsController(IRoomService rooms) : ControllerBase
     [HttpGet]
     public async Task<ActionResult<List<RoomDto>>> GetAll([FromQuery] RoomFilterDto filter)
         => Ok(await rooms.GetAllAsync(filter));
+
+    [HttpGet("filter-options")]
+    public async Task<ActionResult<RoomFilterOptionsDto>> GetFilterOptions()
+        => Ok(await rooms.GetFilterOptionsAsync());
 }
