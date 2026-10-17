@@ -14,8 +14,8 @@ public class RoomService(AppDbContext db) : IRoomService
         if (filter.MinCapacity.HasValue)
             query = query.Where(r => r.Capacity >= filter.MinCapacity.Value);
  
-        if (!string.IsNullOrWhiteSpace(filter.Floor))
-            query = query.Where(r => r.Floor.ToLower() == filter.Floor.ToLower());
+        if (filter.Floor is { Count: > 0 })
+            query = query.Where(r => filter.Floor.Contains(r.Floor));
  
         if (filter.HasProjector == true)
             query = query.Where(r => r.HasProjector);
@@ -46,5 +46,24 @@ public class RoomService(AppDbContext db) : IRoomService
                 CancelledReservationsCount = r.Reservations.Count(res => res.Status == ReservationStatus.Cancelled)
             })
             .ToListAsync();
+    }
+
+    public async Task<RoomFilterOptionsDto> GetFilterOptionsAsync()
+    {
+        var rooms = await db.Rooms.ToListAsync();
+
+        var floors = rooms
+            .Select(r => r.Floor)
+            .Distinct()
+            .OrderBy(f => f)
+            .ToList();
+
+        var maxCapacity = rooms.Max(r => r.Capacity);
+
+        return new RoomFilterOptionsDto
+        {
+            Floors = floors,
+            MaxCapacity = maxCapacity
+        };
     }
 }

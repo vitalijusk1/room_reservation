@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import { useSearchParams } from "react-router-dom";
 import axiosInstance from "../../../../api/axiosInstance";
 import { endpoints } from "../../../../api/endpoints";
 import type { Room } from "./types";
@@ -6,6 +7,7 @@ import { Loader } from "../../../../components/Loader/Loader";
 import { ErrorMessage } from "../../../../components/ErrorMessage/ErrorMessage";
 
 const RoomGrid = () => {
+  const [searchParams] = useSearchParams();
   const [rooms, setRooms] = useState<Room[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
@@ -14,7 +16,9 @@ const RoomGrid = () => {
     const getRooms = async () => {
       setLoading(true);
       try {
-        const response = await axiosInstance.get(endpoints.rooms());
+        const response = await axiosInstance.get(endpoints.rooms(), {
+          params: searchParams,
+        });
         setRooms(response.data);
         setError(null);
         setLoading(false);
@@ -24,7 +28,7 @@ const RoomGrid = () => {
       }
     };
     getRooms();
-  }, []);
+  }, [searchParams]);
 
   if (loading) return <Loader />;
   if (error) return <ErrorMessage message={error} />;
