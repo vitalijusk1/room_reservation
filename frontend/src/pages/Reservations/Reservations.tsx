@@ -94,7 +94,7 @@ const Reservations = () => {
 
       <ReservationFilters filterOptions={filterOptions} />
 
-      <ReservationTable reservations={reservations} />
+      <ReservationTable reservations={reservations} onActionComplete={fetchReservations} />
 
       {showForm && (
         <ReservationFormModal
