@@ -5,6 +5,7 @@ import RoomFilters from "./components/RoomFilters/RoomFilters";
 import RoomGrid from "./components/RoomGrid/RoomGrid";
 import axiosInstance from "../../api/axiosInstance";
 import { endpoints } from "../../api/endpoints";
+import { getErrorMessage } from "../../api/getErrorMessage";
 import type { Room } from "./components/RoomGrid/types";
 import type { RoomFilterOptions } from "./components/RoomFilters/types";
 import { Loader } from "../../components/Loader/Loader";
@@ -26,7 +27,7 @@ const Rooms = () => {
         setFilterOptions(response.data);
         setLoadingFilterOptions(false);
       } catch (err) {
-        setError(err instanceof Error ? err.message : null);
+        setError(getErrorMessage(err));
         setLoadingFilterOptions(false);
       }
     };
@@ -44,7 +45,7 @@ const Rooms = () => {
         setError(null);
         setLoading(false);
       } catch (err) {
-        setError(err instanceof Error ? err.message : null);
+        setError(getErrorMessage(err));
         setLoading(false);
       }
     };

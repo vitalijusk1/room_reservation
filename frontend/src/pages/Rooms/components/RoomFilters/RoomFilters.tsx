@@ -56,15 +56,13 @@ const RoomFilters = ({ filterOptions }: RoomFiltersProps) => {
           onToggle={toggleFloor}
         />
 
-        <div>
-          <p className="mb-2 text-sm font-medium text-slate-600">Minimum capacity</p>
-          <Select
-            value={capacity}
-            onChange={handleCapacityChange}
-            placeholder="Any capacity"
-            options={filterOptions.capacities.map((c) => ({ value: c, label: `${c}+ people` }))}
-          />
-        </div>
+        <Select
+          label="Minimum capacity"
+          value={capacity}
+          onChange={handleCapacityChange}
+          placeholder="Any capacity"
+          options={filterOptions.capacities.map((c) => ({ value: c, label: `${c}+ people` }))}
+        />
 
         <CheckboxGroup
           label="Equipment"

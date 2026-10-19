@@ -1,17 +1,53 @@
+import { useState } from "react";
 import type { FormEvent, MouseEvent } from "react";
+import axiosInstance from "../../../../api/axiosInstance";
+import { endpoints } from "../../../../api/endpoints";
+import { getErrorMessage } from "../../../../api/getErrorMessage";
 import type { Room } from "../../../Rooms/components/RoomGrid/types";
 import type { User } from "../../../Users/components/UserTable/types";
+import { ErrorMessage } from "../../../../components/ErrorMessage/ErrorMessage";
+import { Select } from "../../../../components/Select/Select";
+import { DateInput } from "../../../../components/DateInput/DateInput";
+import { TextInput } from "../../../../components/TextInput/TextInput";
 
 interface ReservationFormModalProps {
   onClose: () => void;
+  onCreated: () => void;
   rooms: Room[];
   users: User[];
 }
 
-const ReservationFormModal = ({ onClose, rooms, users }: ReservationFormModalProps) => {
-  const handleSubmit = (event: FormEvent<HTMLFormElement>) => {
+const ReservationFormModal = ({ onClose, onCreated, rooms, users }: ReservationFormModalProps) => {
+  const [title, setTitle] = useState("");
+  const [roomId, setRoomId] = useState("");
+  const [userId, setUserId] = useState("");
+  const [startDate, setStartDate] = useState("");
+  const [endDate, setEndDate] = useState("");
+  const [attendeesCount, setAttendeesCount] = useState("");
+  const [submitting, setSubmitting] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+
+  const handleSubmit = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
-    onClose();
+    setSubmitting(true);
+    setError(null);
+
+    try {
+      await axiosInstance.post(endpoints.reservations(), {
+        title,
+        roomId: Number(roomId),
+        userId: Number(userId),
+        startDate: new Date(startDate).toISOString(),
+        endDate: new Date(endDate).toISOString(),
+        attendeesCount: Number(attendeesCount),
+      });
+      onCreated();
+      onClose();
+    } catch (err) {
+      setError(getErrorMessage(err));
+    } finally {
+      setSubmitting(false);
+    }
   };
 
   const handleModalClick = (event: MouseEvent<HTMLFormElement>) => {
@@ -44,84 +80,62 @@ const ReservationFormModal = ({ onClose, rooms, users }: ReservationFormModalPro
           </button>
         </div>
 
+        {error && (
+          <div className="mt-4">
+            <ErrorMessage message={error} />
+          </div>
+        )}
+
         <div className="mt-6 grid grid-cols-2 gap-4">
-          <label className="col-span-2">
-            <span className="mb-1 block text-sm font-medium text-slate-600">
-              Meeting title
-            </span>
-            <input
-              required
-              className="h-11 w-full rounded-lg border border-slate-200 px-3"
-            />
-          </label>
+          <div className="col-span-2">
+            <TextInput required label="Meeting title" value={title} onChange={setTitle} />
+          </div>
 
-          <label>
-            <span className="mb-1 block text-sm font-medium text-slate-600">
-              Room
-            </span>
-            <select
-              required
-              className="h-11 w-full rounded-lg border border-slate-200 px-3"
-            >
-              <option value="">Select room</option>
-              {rooms.map((room) => (
-                <option key={room.id} value={room.id}>
-                  {room.name}
-                </option>
-              ))}
-            </select>
-          </label>
+          <Select
+            required
+            label="Room"
+            value={roomId}
+            onChange={setRoomId}
+            placeholder="Select room"
+            options={rooms.map((room) => ({ value: room.id, label: room.name }))}
+          />
 
-          <label>
-            <span className="mb-1 block text-sm font-medium text-slate-600">
-              Organizer
-            </span>
-            <select
-              required
-              className="h-11 w-full rounded-lg border border-slate-200 px-3"
-            >
-              <option value="">Select organizer</option>
-              {users.map((user) => (
-                <option key={user.id} value={user.id}>
-                  {user.firstName} {user.lastName}
-                </option>
-              ))}
-            </select>
-          </label>
+          <Select
+            required
+            label="Organizer"
+            value={userId}
+            onChange={setUserId}
+            placeholder="Select organizer"
+            options={users.map((user) => ({
+              value: user.id,
+              label: `${user.firstName} ${user.lastName}`,
+            }))}
+          />
 
-          <label>
-            <span className="mb-1 block text-sm font-medium text-slate-600">
-              Start
-            </span>
-            <input
-              required
-              type="datetime-local"
-              className="h-11 w-full rounded-lg border border-slate-200 px-3 text-sm"
-            />
-          </label>
+          <DateInput
+            required
+            label="Start"
+            type="datetime-local"
+            value={startDate}
+            onChange={setStartDate}
+          />
 
-          <label>
-            <span className="mb-1 block text-sm font-medium text-slate-600">
-              End
-            </span>
-            <input
-              required
-              type="datetime-local"
-              className="h-11 w-full rounded-lg border border-slate-200 px-3 text-sm"
-            />
-          </label>
+          <DateInput
+            required
+            label="End"
+            type="datetime-local"
+            value={endDate}
+            onChange={setEndDate}
+          />
 
-          <label>
-            <span className="mb-1 block text-sm font-medium text-slate-600">
-              Attendees
-            </span>
-            <input
-              required
-              type="number"
-              min="1"
-              className="h-11 w-full rounded-lg border border-slate-200 px-3"
-            />
-          </label>
+          <TextInput
+            required
+            label="Attendees"
+            type="number"
+            min="1"
+            value={attendeesCount}
+            onChange={setAttendeesCount}
+          />
         </div>
 
         <div className="mt-6 flex justify-end gap-3">
@@ -132,8 +146,12 @@ const ReservationFormModal = ({ onClose, rooms, users }: ReservationFormModalPro
           >
             Cancel
           </button>
-          <button className="h-10 rounded-lg bg-indigo-600 px-5 text-sm font-medium text-white hover:bg-indigo-700">
-            Create reservation
+          <button
+            type="submit"
+            disabled={submitting}
+            className="h-10 rounded-lg bg-indigo-600 px-5 text-sm font-medium text-white hover:bg-indigo-700 disabled:opacity-50"
+          >
+            {submitting ? "Creating..." : "Create reservation"}
           </button>
         </div>
       </form>

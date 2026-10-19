@@ -6,6 +6,7 @@ import ReservationTable from "./components/ReservationTable/ReservationTable";
 import ReservationFormModal from "./components/ReservationFormModal/ReservationFormModal";
 import axiosInstance from "../../api/axiosInstance";
 import { endpoints } from "../../api/endpoints";
+import { getErrorMessage } from "../../api/getErrorMessage";
 import type { Reservation } from "./components/ReservationTable/types";
 import type { ReservationFilterOptions } from "./components/ReservationFilters/types";
 import type { Room } from "../Rooms/components/RoomGrid/types";
@@ -33,7 +34,7 @@ const Reservations = () => {
         setFilterOptions(response.data);
         setLoadingFilterOptions(false);
       } catch (err) {
-        setError(err instanceof Error ? err.message : null);
+        setError(getErrorMessage(err));
         setLoadingFilterOptions(false);
       }
     };
@@ -52,28 +53,29 @@ const Reservations = () => {
         setUsers(usersRes.data);
         setLoadingRoomsAndUsers(false);
       } catch (err) {
-        setError(err instanceof Error ? err.message : null);
+        setError(getErrorMessage(err));
         setLoadingRoomsAndUsers(false);
       }
     };
     fetchRoomsAndUsers();
   }, []);
 
+  const fetchReservations = async () => {
+    setLoading(true);
+    try {
+      const response = await axiosInstance.get(endpoints.reservations(), {
+        params: searchParams,
+      });
+      setReservations(response.data);
+      setError(null);
+      setLoading(false);
+    } catch (err) {
+      setError(getErrorMessage(err));
+      setLoading(false);
+    }
+  };
+
   useEffect(() => {
-    const fetchReservations = async () => {
-      setLoading(true);
-      try {
-        const response = await axiosInstance.get(endpoints.reservations(), {
-          params: searchParams,
-        });
-        setReservations(response.data);
-        setError(null);
-        setLoading(false);
-      } catch (err) {
-        setError(err instanceof Error ? err.message : null);
-        setLoading(false);
-      }
-    };
     fetchReservations();
   }, [searchParams]);
 
@@ -97,6 +99,7 @@ const Reservations = () => {
       {showForm && (
         <ReservationFormModal
           onClose={() => setShowForm(false)}
+          onCreated={fetchReservations}
           rooms={rooms}
           users={users}
         />
