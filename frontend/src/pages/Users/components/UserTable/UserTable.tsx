@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import axiosInstance from "../../../../api/axiosInstance";
 import { endpoints } from "../../../../api/endpoints";
+import { getErrorMessage } from "../../../../api/getErrorMessage";
 import type { User } from "./types";
 import { Loader } from "../../../../components/Loader/Loader";
 import { ErrorMessage } from "../../../../components/ErrorMessage/ErrorMessage";
@@ -21,7 +22,7 @@ const UserTable = () => {
       setError(null);
       setLoading(false);
       } catch (err) {
-        setError(err instanceof Error ? err.message : null);
+        setError(getErrorMessage(err));
         setLoading(false);
       }
     };
