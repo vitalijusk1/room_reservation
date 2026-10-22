@@ -7,8 +7,8 @@ namespace RoomReservation.Api.Services;
 
 public class ReservationService(AppDbContext db, IConfiguration config) : IReservationService
 {
-    private readonly int _maxDurationDays = config.GetValue<int>("BookingRules:MaxDurationDays", 7);
-    private readonly int _bookingHorizonDays = config.GetValue<int>("BookingRules:BookingHorizonDays", 90);
+    private readonly int _maxDurationDays = config.GetRequiredSection("BookingRules:MaxDurationDays").Get<int>();
+    private readonly int _bookingHorizonDays = config.GetRequiredSection("BookingRules:BookingHorizonDays").Get<int>();
 
     public async Task<List<ReservationDto>> GetAllAsync(ReservationFilterDto filter)
     {
@@ -161,8 +161,28 @@ public class ReservationService(AppDbContext db, IConfiguration config) : IReser
         if (reservation.Status != ReservationStatus.Booked)
             throw new InvalidOperationException("Only active (Booked) reservations can be ended early.");
 
+        var now = DateTime.UtcNow;
+        if (reservation.StartDate > now)
+            throw new InvalidOperationException("A meeting that has not started yet cannot be ended early. Cancel it instead.");
+
         reservation.Status = ReservationStatus.Completed;
-        reservation.EndDate = DateTime.UtcNow;
+        reservation.EndDate = now;
+        await db.SaveChangesAsync();
+    }
+
+    public async Task CompleteFinishedAsync()
+    {
+        var now = DateTime.UtcNow;
+        var finished = await db.Reservations
+            .Where(r => r.Status == ReservationStatus.Booked && r.EndDate <= now)
+            .ToListAsync();
+
+        if (finished.Count == 0)
+            return;
+
+        foreach (var reservation in finished)
+            reservation.Status = ReservationStatus.Completed;
+
         await db.SaveChangesAsync();
     }
 }
