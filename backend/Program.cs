@@ -18,6 +18,7 @@ builder.Services.AddDbContext<AppDbContext>(opt =>
 builder.Services.AddScoped<IRoomService, RoomService>();
 builder.Services.AddScoped<IUserService, UserService>();
 builder.Services.AddScoped<IReservationService, ReservationService>();
+builder.Services.AddHostedService<ReservationCompletionService>();
 
 var corsOrigins = builder.Configuration["CorsOrigins"] ?? "http://localhost:5173";
 

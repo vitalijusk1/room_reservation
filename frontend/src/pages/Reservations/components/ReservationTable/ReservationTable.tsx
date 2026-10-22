@@ -16,6 +16,15 @@ const statusStyles: Record<string, string> = {
   Cancelled: "bg-slate-100 text-slate-500",
 };
 
+const formatDateTime = (date: string) =>
+  new Date(date).toLocaleString([], {
+    year: "numeric",
+    month: "2-digit",
+    day: "2-digit",
+    hour: "2-digit",
+    minute: "2-digit",
+  });
+
 const ReservationTable = ({ reservations, onActionComplete }: ReservationTableProps) => {
   const [pendingReservationId, setPendingReservationId] = useState<number | null>(null);
   const [error, setError] = useState<string | null>(null);
@@ -73,10 +82,8 @@ const ReservationTable = ({ reservations, onActionComplete }: ReservationTablePr
                 <td className="px-5 py-4 text-sm">{reservation.roomName}</td>
                 <td className="px-5 py-4 text-sm">{reservation.organizerName}</td>
                 <td className="px-5 py-4">
-                  <p className="text-sm">{new Date(reservation.startDate).toLocaleDateString()}</p>
-                  <p className="text-xs text-slate-500">
-                    {new Date(reservation.startDate).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })} – {new Date(reservation.endDate).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}
-                  </p>
+                  <p className="text-sm">{formatDateTime(reservation.startDate)}</p>
+                  <p className="text-xs text-slate-500">→ {formatDateTime(reservation.endDate)}</p>
                 </td>
                 <td className="px-5 py-4 text-sm">{reservation.attendeesCount}</td>
                 <td className="px-5 py-4">
@@ -89,14 +96,16 @@ const ReservationTable = ({ reservations, onActionComplete }: ReservationTablePr
                 <td className="px-5 py-4">
                   {reservation.status === "Booked" && (
                     <div className="flex justify-end gap-2">
-                      <button
-                        type="button"
-                        disabled={pendingReservationId === reservation.id}
-                        onClick={() => handleEndEarly(reservation.id)}
-                        className="rounded px-3 py-2 text-xs font-medium text-amber-700 hover:bg-amber-50 disabled:opacity-50"
-                      >
-                        End early
-                      </button>
+                      {new Date(reservation.startDate) <= new Date() && (
+                        <button
+                          type="button"
+                          disabled={pendingReservationId === reservation.id}
+                          onClick={() => handleEndEarly(reservation.id)}
+                          className="rounded px-3 py-2 text-xs font-medium text-amber-700 hover:bg-amber-50 disabled:opacity-50"
+                        >
+                          End early
+                        </button>
+                      )}
                       <button
                         type="button"
                         disabled={pendingReservationId === reservation.id}

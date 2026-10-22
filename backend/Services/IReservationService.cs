@@ -9,4 +9,5 @@ public interface IReservationService
     Task<ReservationDto> CreateAsync(CreateReservationRequest request);
     Task CancelAsync(int id);
     Task EndEarlyAsync(int id);
+    Task CompleteFinishedAsync();
 }
